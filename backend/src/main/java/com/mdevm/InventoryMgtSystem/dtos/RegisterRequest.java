@@ -24,6 +24,8 @@ public class RegisterRequest {
     @NotBlank(message = "phoneNumber is required")
     private String phoneNumber;
 
-    private UserRole role;
+    // Role is intentionally removed from registration request
+    // All new users are assigned MANAGER role by default in UserServiceImpl
+    // Admin role can only be assigned by existing admins through user update endpoint
 
 }

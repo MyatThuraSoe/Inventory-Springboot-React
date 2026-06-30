@@ -29,27 +29,33 @@ public class AuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        String token = getTokenFromRequest(request);
-
-        if (token != null) {
-            String email = jwtUtils.getUsernameFromToken(token);
-            UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
-
-            if (StringUtils.hasText(email) && jwtUtils.isTokeValid(token, userDetails)) {
-                log.info("Valid Token, {}", email);
-
-                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities()
-                );
-                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-            }
-        }
-
         try {
+            String token = getTokenFromRequest(request);
+
+            if (token != null) {
+                try {
+                    String email = jwtUtils.getUsernameFromToken(token);
+                    UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
+
+                    if (StringUtils.hasText(email) && jwtUtils.isTokeValid(token, userDetails)) {
+                        log.info("Valid Token, {}", email);
+
+                        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                                userDetails, null, userDetails.getAuthorities()
+                        );
+                        authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                    }
+                } catch (Exception e) {
+                    // Invalid or expired token - just continue as unauthenticated
+                    log.debug("Invalid or expired token: {}", e.getMessage());
+                }
+            }
+
             filterChain.doFilter(request, response);
         } catch (Exception e) {
             log.error("Exception occurred in AuthFilter: " + e.getMessage());
+            filterChain.doFilter(request, response);
         }
 
     }

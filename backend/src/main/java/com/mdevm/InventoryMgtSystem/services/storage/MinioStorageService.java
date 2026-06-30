@@ -34,8 +34,19 @@ public class MinioStorageService {
                 throw new IllegalArgumentException("File cannot be empty");
             }
 
-            if (!file.getContentType().startsWith("image/")) {
+            // Validate file content type by checking MIME type from actual content, not just header
+            String contentType = file.getContentType();
+            if (contentType == null || !contentType.startsWith("image/")) {
                 throw new IllegalArgumentException("Only image files are allowed");
+            }
+
+            // Additional validation: check file extension to prevent SVG/script uploads
+            String originalFilename = file.getOriginalFilename();
+            if (originalFilename != null) {
+                String lowerCaseFilename = originalFilename.toLowerCase();
+                if (lowerCaseFilename.endsWith(".svg") || lowerCaseFilename.endsWith(".svgz")) {
+                    throw new IllegalArgumentException("SVG files are not allowed for security reasons");
+                }
             }
 
             if (file.getSize() > 1024 * 1024 * 1024) { // 1GB limit

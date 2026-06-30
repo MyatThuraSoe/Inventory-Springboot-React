@@ -41,12 +41,13 @@ public class Product {
     private LocalDateTime expiryDate;
     private String imageUrl;
 
-    private final LocalDateTime createdAt = LocalDateTime.now();
-
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
 
+    @Column(name = "created_at")
+    @CreationTimestamp
+    private LocalDateTime createdAt;
 
     @Override
     public String toString() {

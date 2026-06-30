@@ -1,47 +1,30 @@
 import axios from "axios";
-import CryptoJS from "crypto-js";
 
 export default class ApiService {
 
     static BASE_URL = "http://localhost:5050/api";
-    static ENCRYPTION_KEY = "mdevm!123";
 
 
-    //encrypt data using cryptoJs
-    static encrypt(data) {
-        return CryptoJS.AES.encrypt(data, this.ENCRYPTION_KEY.toString());
-    }
-
-    //decrypt data using cryptoJs
-    static decrypt(data) {
-        const bytes = CryptoJS.AES.decrypt(data, this.ENCRYPTION_KEY);
-        return bytes.toString(CryptoJS.enc.Utf8);
-    }
-
-    //save token with encryption
+    //save token directly without fake encryption
+    // The previous AES encryption with hardcoded key provided no real security
+    // and gave false sense of protection. XSS can still access localStorage directly.
     static saveToken(token) {
-        const encryptedToken = this.encrypt(token);
-        localStorage.setItem("token", encryptedToken)
+        localStorage.setItem("token", token)
     }
 
-    // retreive the token
+    // retrieve the token
     static getToken() {
-        const encryptedToken = localStorage.getItem("token");
-        if (!encryptedToken) return null;
-        return this.decrypt(encryptedToken);
+        return localStorage.getItem("token");
     }
 
-    //save Role with encryption
+    //save Role directly without fake encryption
     static saveRole(role) {
-        const encryptedRole = this.encrypt(role);
-        localStorage.setItem("role", encryptedRole)
+        localStorage.setItem("role", role)
     }
 
     // retreive the role
     static getRole() {
-        const encryptedRole = localStorage.getItem("role");
-        if (!encryptedRole) return null;
-        return this.decrypt(encryptedRole);
+        return localStorage.getItem("role");
     }
 
     static clearAuth() {
