@@ -64,7 +64,7 @@ public class TransactionServiceImpl implements TransactionService {
         Supplier supplier = supplierRepository.findById(supplierId)
                 .orElseThrow(() -> new NotFoundException("Supplier Not Found"));
 
-        User user = userService.getCurrentLoggedInUser();
+        User user = userService.getCurrentLoggedInUserEntity();
 
         //update the stock quantity and re-save
         product.setStockQuantity(product.getStockQuantity() + quantity);
@@ -110,7 +110,7 @@ public class TransactionServiceImpl implements TransactionService {
             throw new NameValueRequiredException("Insufficient stock. Available: " + product.getStockQuantity());
         }
 
-        User user = userService.getCurrentLoggedInUser();
+        User user = userService.getCurrentLoggedInUserEntity();
 
         //update the stock quantity and re-save
         product.setStockQuantity(product.getStockQuantity() - quantity);
@@ -157,7 +157,7 @@ public class TransactionServiceImpl implements TransactionService {
         Supplier supplier = supplierRepository.findById(supplierId)
                 .orElseThrow(() -> new NotFoundException("Supplier Not Found"));
 
-        User user = userService.getCurrentLoggedInUser();
+        User user = userService.getCurrentLoggedInUserEntity();
 
         // Check that sufficient stock exists before returning
         if (product.getStockQuantity() < quantity) {

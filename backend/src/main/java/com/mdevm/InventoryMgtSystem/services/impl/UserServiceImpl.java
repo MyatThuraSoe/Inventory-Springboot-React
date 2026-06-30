@@ -94,13 +94,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDTO getCurrentLoggedInUser() {
+    public User getCurrentLoggedInUserEntity() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         String email = authentication.getName();
 
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new NotFoundException("User Not Found"));
+        return userRepository.findByEmail(email).orElseThrow(() -> new NotFoundException("User Not Found"));
+    }
 
+    @Override
+    public UserDTO getCurrentLoggedInUser() {
+        User user = getCurrentLoggedInUserEntity();
         // Return DTO instead of entity to avoid exposing password hash
         return modelMapper.map(user, UserDTO.class);
     }
