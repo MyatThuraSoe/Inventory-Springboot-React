@@ -27,7 +27,7 @@
 		<url/>
 	</scm>
 	<properties>
-		<java.version>21</java.version>
+		<java.version>17</java.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -93,7 +93,9 @@
 			<artifactId>modelmapper</artifactId>
 			<version>3.2.1</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/software.amazon.awssdk/s3 -->
+		<!-- https://mvnrepository.com/artifact/software.amazon.awssdk/s3 
+		Uncommented for MinIO integration (uses AWS S3 SDK with MinIO endpoint)
+		-->
 		<dependency>
 			<groupId>software.amazon.awssdk</groupId>
 			<artifactId>s3</artifactId>
