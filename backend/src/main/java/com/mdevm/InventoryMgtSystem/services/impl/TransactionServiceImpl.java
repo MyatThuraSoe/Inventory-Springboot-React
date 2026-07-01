@@ -28,6 +28,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -45,6 +46,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final ModelMapper modelMapper;
 
     @Override
+    @Transactional
     public Response purchase(TransactionRequest transactionRequest) {
 
         Long productId = transactionRequest.getProductId();
@@ -52,6 +54,9 @@ public class TransactionServiceImpl implements TransactionService {
         Integer quantity = transactionRequest.getQuantity();
 
         if (supplierId == null) throw new NameValueRequiredException("Supplier Id is Required");
+        if (quantity == null || quantity <= 0) {
+            throw new NameValueRequiredException("Quantity must be positive");
+        }
 
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new NotFoundException("Product Not Found"));
@@ -59,7 +64,7 @@ public class TransactionServiceImpl implements TransactionService {
         Supplier supplier = supplierRepository.findById(supplierId)
                 .orElseThrow(() -> new NotFoundException("Supplier Not Found"));
 
-        User user = userService.getCurrentLoggedInUser();
+        User user = userService.getCurrentLoggedInUserEntity();
 
         //update the stock quantity and re-save
         product.setStockQuantity(product.getStockQuantity() + quantity);
@@ -87,15 +92,25 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
+    @Transactional
     public Response sell(TransactionRequest transactionRequest) {
 
         Long productId = transactionRequest.getProductId();
         Integer quantity = transactionRequest.getQuantity();
 
+        if (quantity == null || quantity <= 0) {
+            throw new NameValueRequiredException("Quantity must be positive");
+        }
+
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new NotFoundException("Product Not Found"));
 
-        User user = userService.getCurrentLoggedInUser();
+        // Check that sufficient stock exists before selling
+        if (product.getStockQuantity() < quantity) {
+            throw new NameValueRequiredException("Insufficient stock. Available: " + product.getStockQuantity());
+        }
+
+        User user = userService.getCurrentLoggedInUserEntity();
 
         //update the stock quantity and re-save
         product.setStockQuantity(product.getStockQuantity() - quantity);
@@ -124,6 +139,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
+    @Transactional
     public Response returnToSupplier(TransactionRequest transactionRequest) {
 
         Long productId = transactionRequest.getProductId();
@@ -131,6 +147,9 @@ public class TransactionServiceImpl implements TransactionService {
         Integer quantity = transactionRequest.getQuantity();
 
         if (supplierId == null) throw new NameValueRequiredException("Supplier Id is Required");
+        if (quantity == null || quantity <= 0) {
+            throw new NameValueRequiredException("Quantity must be positive");
+        }
 
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new NotFoundException("Product Not Found"));
@@ -138,7 +157,12 @@ public class TransactionServiceImpl implements TransactionService {
         Supplier supplier = supplierRepository.findById(supplierId)
                 .orElseThrow(() -> new NotFoundException("Supplier Not Found"));
 
-        User user = userService.getCurrentLoggedInUser();
+        User user = userService.getCurrentLoggedInUserEntity();
+
+        // Check that sufficient stock exists before returning
+        if (product.getStockQuantity() < quantity) {
+            throw new NameValueRequiredException("Insufficient stock. Available: " + product.getStockQuantity());
+        }
 
         //update the stock quantity and re-save
         product.setStockQuantity(product.getStockQuantity() - quantity);

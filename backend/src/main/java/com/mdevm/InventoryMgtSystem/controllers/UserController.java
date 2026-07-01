@@ -25,11 +25,13 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("@userServiceImpl.isCurrentUserOrAdmin(#id)")
     public ResponseEntity<Response> getUserById(@PathVariable Long id) {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
     @PutMapping("/update/{id}")
+    @PreAuthorize("@userServiceImpl.isCurrentUserOrAdmin(#id)")
     public ResponseEntity<Response> updateUser(@PathVariable Long id, @RequestBody UserDTO userDTO) {
         return ResponseEntity.ok(userService.updateUser(id, userDTO));
     }
@@ -41,12 +43,13 @@ public class UserController {
     }
 
     @GetMapping("/transactions/{userId}")
+    @PreAuthorize("@userServiceImpl.isCurrentUserOrAdmin(#userId)")
     public ResponseEntity<Response> getUserAndTransactions(@PathVariable Long userId) {
         return ResponseEntity.ok(userService.getUserTransactions(userId));
     }
 
     @GetMapping("/current")
-    public ResponseEntity<User> getCurrentUser(){
+    public ResponseEntity<UserDTO> getCurrentUser(){
         return ResponseEntity.ok(userService.getCurrentLoggedInUser());
     }
 

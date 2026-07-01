@@ -13,7 +13,9 @@ public interface UserService {
 
     Response getAllUsers();
 
-    User getCurrentLoggedInUser();
+    UserDTO getCurrentLoggedInUser();
+
+    User getCurrentLoggedInUserEntity();
 
     Response getUserById(Long id);
 
@@ -22,4 +24,10 @@ public interface UserService {
     Response deleteUser(Long id);
 
     Response getUserTransactions(Long id);
+
+    /**
+     * Check if the current user is either an ADMIN or the owner of the given user ID.
+     * Used for @PreAuthorize expressions.
+     */
+    boolean isCurrentUserOrAdmin(Long userId);
 }

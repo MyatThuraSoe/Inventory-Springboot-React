@@ -37,11 +37,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public Response registerUser(RegisterRequest registerRequest) {
 
+        // All new users are assigned MANAGER role by default - role cannot be set via registration
         UserRole role = UserRole.MANAGER;
-
-        if (registerRequest.getRole() != null) {
-            role = registerRequest.getRole();
-        }
 
         User userToSave = User.builder()
                 .name(registerRequest.getName())
@@ -97,16 +94,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getCurrentLoggedInUser() {
+    public User getCurrentLoggedInUserEntity() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         String email = authentication.getName();
 
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new NotFoundException("User Not Found"));
+        return userRepository.findByEmail(email).orElseThrow(() -> new NotFoundException("User Not Found"));
+    }
 
-        user.setTransactions(null);
-
-        return user;
+    @Override
+    public UserDTO getCurrentLoggedInUser() {
+        User user = getCurrentLoggedInUserEntity();
+        // Return DTO instead of entity to avoid exposing password hash
+        return modelMapper.map(user, UserDTO.class);
     }
 
     @Override
@@ -176,5 +176,20 @@ public class UserServiceImpl implements UserService {
                 .message("success")
                 .user(userDTO)
                 .build();
+    }
+
+    @Override
+    public boolean isCurrentUserOrAdmin(Long userId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return false;
+        }
+
+        String currentEmail = authentication.getName();
+        User currentUser = userRepository.findByEmail(currentEmail)
+                .orElseThrow(() -> new NotFoundException("Current user not found"));
+
+        // Allow if user is ADMIN or if they're accessing their own data
+        return currentUser.getRole() == UserRole.ADMIN || currentUser.getId().equals(userId);
     }
 }

@@ -1,48 +1,25 @@
 ```
 # Compiled and build artifacts
 *.class
-*.o
-*.obj
-*.out
 target/
-build/
 
 # Dependencies
-.mvn/
-mvnw
 .m2/
 .gradle/
-
-# Logs and temp files
-*.log
-*.tmp
-*.swp
 
 # Environment
 .env
 .env.local
 *.env.*
 
+# Logs
+*.log
+
 # Editors
 .vscode/
 .idea/
-*.swp
-*.swo
 
-# Python specific (if any Python files exist in project)
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.pytest_cache/
-.mypy_cache/
-
-# Coverage reports
-coverage/
-htmlcov/
-.coverage
-
-# OS generated files
+# OS
 .DS_Store
 Thumbs.db
 ```
